@@ -6,7 +6,7 @@ module Network.FTPE.Client
    setLogLevel, Priority(..), easyConnectFTP, getPassword, connectFTP, FConnection, login,
    Timeout (Time), dir, quit, sendcmd, cwd, nlst, loginAnon
    , module Control.Monad.State.Strict
-   , sendcmdM, cwdM
+   , sendcmdM, cwdM, quitM
  )
            
 where
@@ -99,6 +99,7 @@ d' fun var d  = block' var $ \f -> do l <- fun f d
 quit :: TMVar FConnection -> IO FTPResult
 quit = s' N.quit
 
+
 s' :: (N.FTPConnection -> IO b) -> TMVar FConnection -> IO b
 s' fun var = block' var fun 
 
@@ -110,16 +111,20 @@ s'' :: (N.FTPConnection -> b1 -> IO b) -> TMVar FConnection -> b1 -> IO b
 s'' fun var str = block' var $ flip fun str
 
 
+quitM :: FTPM FTPResult
+quitM = monblock' $ flip block' N.quit
+
 sendcmdM, cwdM:: String -> FTPM FTPResult                  
 sendcmdM = sM'' N.sendcmd
 cwdM = sM'' N.cwd
  
-sM'' :: (MonadIO m, MonadState (TMVar FConnection) m) =>
-          (N.FTPConnection -> b1 -> IO b) -> b1 -> m b
+--sM'' :: (MonadIO m, MonadState (TMVar FConnection) m) =>
+--          (N.FTPConnection -> b1 -> IO b) -> b1 -> m b
+sM'' ::(N.FTPConnection -> b1 -> IO b) -> b1 -> FTPM b
 sM'' fun str = monblock' (\s ->  block' s  $ flip fun str)
 
-monblock' :: (MonadIO m, MonadState t m) =>
-               (t -> IO b) -> m b
+monblock' :: 
+               (TMVar FConnection -> IO b) -> FTPM b
 monblock' fun = do s <- get
                    liftIO $ fun s
                  
