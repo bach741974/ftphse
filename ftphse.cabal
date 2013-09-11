@@ -12,7 +12,9 @@ library
                    hslogger,
                    network,
                    stm,
-                   MissingH
+                   MissingH,
+                   mtl
   ghc-options:     -Wall
   other-modules:   Network.FTPE.Client
+  exposed-modules: Network.FTPE.Client
 

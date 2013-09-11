@@ -4,6 +4,8 @@ module Network.FTPE.Client
   
    setLogLevel, Priority(..), easyConnectFTP, getPassword, connectFTP, FConnection, login,
    Timeout (Time), dir, quit, sendcmd, cwd, nlst, loginAnon
+   , module Control.Monad.State.Strict
+   , sendcmdM
  )
            
 where
@@ -16,12 +18,14 @@ import Control.Monad.STM (atomically)
 import Control.Concurrent.STM.TMVar
 import Control.Concurrent (forkFinally, threadDelay)
 import GHC.Conc.Sync (ThreadId)
-import Control.Monad (forever)
+--import Control.Monad (forever)
+import Control.Monad.State.Strict
+import Control.Exception.Base hiding (block)
 
 newtype FConnection = FTP (N.FTPConnection, Bool)
 newtype Timeout = Time Int
 
-
+type FTPM   = StateT (TMVar FConnection) IO  
          
 setLogLevel :: Priority -> IO ()
 setLogLevel lev = do
@@ -30,8 +34,8 @@ setLogLevel lev = do
                     where  level = setLevel lev 
                     
 
-
-
+             
+                        
 easyConnectFTP :: HostName -> IO (TMVar FConnection)
 easyConnectFTP h = do 
                         con <-  N.easyConnectFTP h
@@ -104,11 +108,15 @@ cwd = s'' N.cwd
 s'' :: (N.FTPConnection -> b1 -> IO b) -> TMVar FConnection -> b1 -> IO b
 s'' fun var str = block var $ flip fun str
 
+sendcmdM:: String -> FTPM FTPResult
+sendcmdM str = do s <- get
+                  liftIO $ block s  $ flip N.sendcmd str
+                      
 block :: TMVar FConnection -> (N.FTPConnection -> IO b) -> IO b
 block var action = do 
                 ftp@(FTP (f, _)) <- atomically $ takeTMVar var
-                a <- action f
-                atomically $ putTMVar var ftp
-                return a
-  
+                finally  
+                   (action f)
+                   $ atomically $ putTMVar var ftp
+                           
 
