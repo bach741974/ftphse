@@ -12,7 +12,7 @@ module Network.FTPE.Client
 where
 import System.Log.Logger (Priority(..), updateGlobalLogger, setLevel)
 import qualified Network.FTP.Client  as N 
-import Network.FTP.Client (getPassword)
+
 import Network.FTP.Client.Parser (FTPResult)
 import Network.Socket(PortNumber, HostName)
 import Control.Monad.STM (atomically)
@@ -22,6 +22,8 @@ import GHC.Conc.Sync (ThreadId)
 --import Control.Monad (forever)
 import Control.Monad.State.Strict
 import Control.Exception.Base (finally)
+import System.IO (stdin, hGetEcho, hSetEcho, stdout, hFlush)
+import Control.Exception (bracket_)
 
 newtype FConnection = FTP (N.FTPConnection, Bool)
 newtype Timeout = Time Int
@@ -135,4 +137,18 @@ block' var action = do
                    (action f)
                    $ atomically $ putTMVar var ftp
                            
+-- | For using in getPassword function.          
+withEcho :: Bool -> IO a -> IO a
+withEcho echo action = do
+  old <- hGetEcho stdin
+  bracket_ (hSetEcho stdin echo) (hSetEcho stdin old) action  
 
+-- | Getting password for more safe login.
+  
+getPassword :: IO String
+getPassword = do
+  putStr "Password: "
+  hFlush stdout
+  pass <- withEcho False getLine
+  putChar '\n'
+  return pass 

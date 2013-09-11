@@ -2,7 +2,7 @@ name:           ftphse
 version:        0.4
 cabal-version:  >=1.2
 build-type:     Simple
-author:         bahvalov
+author:         Evgeny V. Bahvalov
 
 library
   hs-source-dirs:  src
@@ -15,6 +15,6 @@ library
                    MissingH,
                    mtl
   ghc-options:     -Wall
-  other-modules:   Network.FTPE.Client
+  
   exposed-modules: Network.FTPE.Client
 
