@@ -17,4 +17,7 @@ library
   ghc-options:     -Wall
   
   exposed-modules: Network.FTPE.Client
+  other-modules:   
+                   Network.FTPE.Internal.FClient,
+                   Network.FTPE.Internal.MClient
 
