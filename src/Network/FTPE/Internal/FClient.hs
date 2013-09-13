@@ -1,12 +1,11 @@
 
-{-# LANGUAGE FlexibleContexts #-}
 module Network.FTPE.Internal.FClient 
 (
  -- * FTP commands 
   
    setLogLevel, Priority(..), easyConnectFTP, getPassword, connectFTP, login,
    Timeout (Time), dir, quit, sendcmd, cwd, nlst, loginAnon, FConnection(FTP) 
-   ,  block' 
+   ,  block', setPassive 
    
  ) 
            
@@ -22,7 +21,7 @@ import Control.Concurrent (forkFinally, threadDelay)
 import GHC.Conc.Sync (ThreadId)
 --import Control.Monad (forever)
 import Control.Monad.State.Strict (forever)
-import Control.Exception.Base (finally)
+import Control.Exception.Base (finally, onException)
 import System.IO (stdin, hGetEcho, hSetEcho, stdout, hFlush)
 import Control.Exception (bracket_)
 
@@ -89,6 +88,18 @@ l' fun var t' = do
                                            (Just ftp@(FTP (f, _))) ->  do _ <- N.sendcmd f "NOOP"
                                                                           atomically $ putTMVar var ftp  
                                                                      
+
+
+setPassive :: TMVar FConnection -> Bool -> IO (TMVar FConnection)
+setPassive var b = do 
+                ftp@(FTP (f, b1)) <- atomically $ takeTMVar var
+                onException  
+                   ((\f1 -> atomically $ putTMVar var $ FTP (f1, b1)) (N.setPassive f b) >> return var)                      
+                   $ atomically $ putTMVar var ftp >> return var 
+                   
+               
+                   
+                   
 
 nlst, dir :: TMVar FConnection -> Maybe String -> IO [String]
 nlst = d' N.nlst

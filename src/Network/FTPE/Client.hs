@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts #-}
+
 module Network.FTPE.Client
 (
   module Network.FTPE.Internal.FClient,
