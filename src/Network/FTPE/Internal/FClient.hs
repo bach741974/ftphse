@@ -24,6 +24,7 @@ import Control.Monad.State.Strict (forever)
 import Control.Exception.Base (finally, onException)
 import System.IO (stdin, hGetEcho, hSetEcho, stdout, hFlush)
 import Control.Exception (bracket_)
+import Control.Monad (void)
 
 newtype FConnection = FTP (N.FTPConnection, Bool)
 newtype Timeout = Time Int
@@ -76,7 +77,8 @@ l' fun var t' = do
                     else                                              
                         do res <-  fun f
                            idT <-  case t' of 
-                                     (Just (Time t)) -> fmap Just $ forkFinally (forever $ threadDelay t >> noop) $ \_ -> return ()                                                               
+                                     (Just (Time t)) -> fmap Just $ forkFinally (forever $ threadDelay t >> noop) 
+                                        $ \_ -> atomically $ void (putTMVar var ftp)                                                               
                                      Nothing -> return Nothing 
                            atomically $ putTMVar var $ FTP (f, True)
                            return (Just res, idT)  
@@ -90,12 +92,12 @@ l' fun var t' = do
                                                                      
 
 
-setPassive :: TMVar FConnection -> Bool -> IO (TMVar FConnection)
+setPassive :: TMVar FConnection -> Bool -> IO ()
 setPassive var b = do 
                 ftp@(FTP (f, b1)) <- atomically $ takeTMVar var
                 onException  
-                   ((\f1 -> atomically $ putTMVar var $ FTP (f1, b1)) (N.setPassive f b) >> return var)                      
-                   $ atomically $ putTMVar var ftp >> return var 
+                   (return (N.setPassive f b) >>= \f1 -> atomically $ putTMVar var $ FTP (f1, b1))                      
+                   $ atomically  (putTMVar var ftp)  
                    
                
                    
