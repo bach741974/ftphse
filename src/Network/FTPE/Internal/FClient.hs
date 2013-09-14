@@ -5,7 +5,7 @@ module Network.FTPE.Internal.FClient
   
    setLogLevel, Priority(..), easyConnectFTP, getPassword, connectFTP, login,
    Timeout (Time), dir, quit, sendcmd, cwd, nlst, loginAnon, FConnection(FTP) 
-   ,  block', setPassive 
+   ,  block', setPassive, isPassive 
    
  ) 
            
@@ -115,6 +115,8 @@ d' fun var d  = block' var $ \f -> do l <- fun f d
 quit :: TMVar FConnection -> IO FTPResult
 quit = s' N.quit
 
+isPassive :: TMVar FConnection -> IO Bool
+isPassive = s' $ return . N.isPassive
 
 s' :: (N.FTPConnection -> IO b) -> TMVar FConnection -> IO b
 s' fun var = block' var fun 
