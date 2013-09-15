@@ -5,7 +5,7 @@ module Network.FTPE.Internal.FClient
   
    setLogLevel, Priority(..), easyConnectFTP, getPassword, connectFTP, login,
    Timeout (Time), dir, quit, sendcmd, cwd, nlst, loginAnon, FConnection(FTP) 
-   ,  block', setPassive, isPassive 
+   ,  block', setPassive, isPassive, N.enableFTPDebugging, getlines, getbinary 
    
  ) 
            
@@ -99,13 +99,19 @@ setPassive var b = do
                    (return (N.setPassive f b) >>= \f1 -> atomically $ putTMVar var $ FTP (f1, b1))                      
                    $ atomically  (putTMVar var ftp)  
                    
+getbinary :: TMVar FConnection -> String -> IO (String, FTPResult)
+getbinary = s'' N.getbinary 
                
-                   
+getlines :: TMVar FConnection -> String -> IO ([String], FTPResult)
+getlines var s = block' var $ \f -> do (l, res) <- N.getlines f s                 
+                                       fmap (\l1 -> (l1,res)) $ mapM return l                    
                    
 
 nlst, dir :: TMVar FConnection -> Maybe String -> IO [String]
 nlst = d' N.nlst
 dir = d' N.dir
+
+
 
 d' :: (N.FTPConnection -> t -> IO [b])
           -> TMVar FConnection -> t -> IO [b]
