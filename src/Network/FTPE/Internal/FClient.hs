@@ -101,7 +101,8 @@ setPassive var b = do
                    $ atomically  (putTMVar var ftp)  
                    
 getbinary :: TMVar FConnection -> String -> IO (String, FTPResult)
-getbinary = s'' N.getbinary 
+getbinary var s = block' var $ \f -> do (l, res) <- N.getbinary f s                 
+                                        fmap (\l1 -> (l1,res)) $ mapM return l 
                
 getlines :: TMVar FConnection -> String -> IO ([String], FTPResult)
 getlines var s = block' var $ \f -> do (l, res) <- N.getlines f s                 
