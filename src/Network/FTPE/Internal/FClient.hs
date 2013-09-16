@@ -5,7 +5,8 @@ module Network.FTPE.Internal.FClient
   
    setLogLevel, Priority(..), easyConnectFTP, getPassword, connectFTP, login,
    Timeout (Time), dir, quit, sendcmd, cwd, nlst, loginAnon, FConnection(FTP) 
-   ,  block', setPassive, isPassive, N.enableFTPDebugging, getlines, getbinary 
+   ,  block', setPassive, isPassive, N.enableFTPDebugging, getlines, getbinary
+   , ThreadId 
    
  ) 
            
