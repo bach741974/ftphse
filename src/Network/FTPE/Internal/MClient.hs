@@ -4,7 +4,8 @@ module Network.FTPE.Internal.MClient
    , isPassiveM, dirM, nlstM, getbinaryM, getlinesM
    , setPassiveM, loginM, downloadbinaryM, deleteM
    , sizeM, rmdirM, mkdirM, pwdM, renameM, putlinesM
-   , putbinaryM  
+   , putbinaryM, uploadbinaryM, FTPM, retrlinesM
+   , storlinesM  
  )
            
 where
@@ -28,12 +29,13 @@ type FTPM   = StateT (TMVar FConnection) IO
 quitM :: FTPM FTPResult
 quitM = monblock' $ flip block' N.quit
 
-sendcmdM, cwdM, downloadbinaryM, deleteM, rmdirM:: String -> FTPM FTPResult                  
+sendcmdM, cwdM, downloadbinaryM, deleteM, rmdirM, uploadbinaryM:: String -> FTPM FTPResult                  
 sendcmdM  = aux sendcmd
 cwdM  = aux cwd 
 downloadbinaryM= aux downloadbinary
 deleteM = aux delete
 rmdirM = aux rmdir
+uploadbinaryM = aux uploadbinary
 
 
 mkdirM :: String -> FTPM (Maybe String, FTPResult)
@@ -49,8 +51,9 @@ dirM, nlstM :: Maybe String -> FTPM [String]
 dirM = aux dir
 nlstM= aux nlst
 
-getlinesM :: String -> FTPM ([String], FTPResult)
+getlinesM, retrlinesM :: String -> FTPM ([String], FTPResult)
 getlinesM= aux getlines
+retrlinesM = aux retrlines
 
 getbinaryM :: String -> FTPM (String, FTPResult)
 getbinaryM = aux getbinary
@@ -75,8 +78,9 @@ isPassiveM= monblock' isPassive
 renameM :: String -> String -> FTPM FTPResult
 renameM = aux' rename
 
-putlinesM :: String -> [String] -> FTPM FTPResult
-putlinesM = aux' putlines 
+putlinesM, storlinesM :: String -> [String] -> FTPM FTPResult
+putlinesM = aux' putlines
+storlinesM = aux' storlines 
 
 putbinaryM :: String -> String -> FTPM FTPResult
 putbinaryM = aux' putbinary

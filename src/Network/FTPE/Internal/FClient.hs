@@ -7,7 +7,7 @@ module Network.FTPE.Internal.FClient
    Timeout (Time), dir, quit, sendcmd, cwd, nlst, loginAnon, FConnection(FTP) 
    ,  block', setPassive, isPassive, N.enableFTPDebugging, getlines, getbinary
    , ThreadId, downloadbinary, delete, size, rmdir, mkdir, pwd, rename, putlines
-   , putbinary 
+   , putbinary, uploadbinary, retrlines, storlines 
    
  ) 
            
@@ -107,7 +107,12 @@ getbinary var s = block' var $ \f -> do (l, res) <- N.getbinary f s
                
 getlines :: TMVar FConnection -> String -> IO ([String], FTPResult)
 getlines var s = block' var $ \f -> do (l, res) <- N.getlines f s                 
-                                       fmap (\l1 -> (l1,res)) $ mapM return l                    
+                                       fmap (\l1 -> (l1,res)) $ mapM return l 
+                                       
+retrlines :: TMVar FConnection
+                   -> String -> IO ([String], FTPResult)
+retrlines var s = block' var $ \f -> do (l, res) <- N.retrlines f s                 
+                                        fmap (\l1 -> (l1,res)) $ mapM return l                                                          
                    
 
 nlst, dir :: TMVar FConnection -> Maybe String -> IO [String]
@@ -130,12 +135,13 @@ isPassive = s' $ return . N.isPassive
 s' :: (N.FTPConnection -> IO b) -> TMVar FConnection -> IO b
 s' fun var = block' var fun 
 
-sendcmd, cwd, downloadbinary, delete,rmdir :: TMVar FConnection -> String -> IO FTPResult
+sendcmd, cwd, downloadbinary, delete,rmdir, uploadbinary :: TMVar FConnection -> String -> IO FTPResult
 sendcmd   = s'' N.sendcmd
 cwd = s'' N.cwd
 downloadbinary = s'' N.downloadbinary
 rmdir = s'' N.rmdir
 delete = s'' N.delete
+uploadbinary = s'' N.uploadbinary
 
 size :: (Num a, Read a) => TMVar FConnection -> String -> IO a
 size = s'' N.size
@@ -153,8 +159,9 @@ pwd  = flip block' N.pwd
 rename :: TMVar FConnection -> String -> String -> IO FTPResult
 rename = aux N.rename 
 
-putlines :: TMVar FConnection -> String -> [String] -> IO FTPResult
+putlines, storlines :: TMVar FConnection -> String -> [String] -> IO FTPResult
 putlines  = aux N.putlines
+storlines = aux N.storlines
 
 putbinary :: TMVar FConnection -> String -> String -> IO FTPResult
 putbinary = aux N.putbinary 
