@@ -6,7 +6,8 @@ module Network.FTPE.Internal.FClient
    setLogLevel, Priority(..), easyConnectFTP, getPassword, connectFTP, login,
    Timeout (Time), dir, quit, sendcmd, cwd, nlst, loginAnon, FConnection(FTP) 
    ,  block', setPassive, isPassive, N.enableFTPDebugging, getlines, getbinary
-   , ThreadId 
+   , ThreadId, downloadbinary, delete, size, rmdir, mkdir, pwd, rename, putlines
+   , putbinary 
    
  ) 
            
@@ -129,14 +130,38 @@ isPassive = s' $ return . N.isPassive
 s' :: (N.FTPConnection -> IO b) -> TMVar FConnection -> IO b
 s' fun var = block' var fun 
 
-sendcmd, cwd :: TMVar FConnection -> String -> IO FTPResult
+sendcmd, cwd, downloadbinary, delete,rmdir :: TMVar FConnection -> String -> IO FTPResult
 sendcmd   = s'' N.sendcmd
 cwd = s'' N.cwd
+downloadbinary = s'' N.downloadbinary
+rmdir = s'' N.rmdir
+delete = s'' N.delete
+
+size :: (Num a, Read a) => TMVar FConnection -> String -> IO a
+size = s'' N.size
+
+mkdir :: TMVar FConnection
+               -> String -> IO (Maybe String, FTPResult)
+mkdir = s'' N.mkdir
 
 s'' :: (N.FTPConnection -> b1 -> IO b) -> TMVar FConnection -> b1 -> IO b
 s'' fun var str = block' var $ flip fun str
 
+pwd :: TMVar FConnection -> IO (Maybe String, FTPResult)
+pwd  = flip block' N.pwd
 
+rename :: TMVar FConnection -> String -> String -> IO FTPResult
+rename = aux N.rename 
+
+putlines :: TMVar FConnection -> String -> [String] -> IO FTPResult
+putlines  = aux N.putlines
+
+putbinary :: TMVar FConnection -> String -> String -> IO FTPResult
+putbinary = aux N.putbinary 
+
+aux :: (N.FTPConnection -> t -> t1 -> IO b)
+         -> TMVar FConnection -> t -> t1 -> IO b
+aux fun var s1 s2 = block' var (\f -> fun f s1 s2)
                  
 block' :: TMVar FConnection -> (N.FTPConnection -> IO b) -> IO b
 block' var action = do 
