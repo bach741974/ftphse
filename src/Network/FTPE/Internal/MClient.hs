@@ -16,16 +16,11 @@ import qualified Network.FTP.Client  as N
 import Network.FTP.Client.Parser (FTPResult)
 
 
-import Control.Concurrent.STM.TMVar
-
 import Control.Monad.State.Strict (runStateT, StateT, liftIO, get)
 
 
-type FTPM   = StateT (TMVar FConnection) IO  
-         
-
-
-
+type FTPM   = StateT FConn IO  
+ 
 quitM :: FTPM FTPResult
 quitM = monblock' $ flip block' N.quit
 
@@ -69,7 +64,7 @@ loginM :: Maybe Timeout
 loginM t name p acc = do s <- get
                          liftIO $ login s t name p acc
 
-aux :: (TMVar FConnection -> b1 -> IO b) -> b1 -> FTPM b
+aux :: (FConn -> b1 -> IO b) -> b1 -> FTPM b
 aux f t = monblock' $ flip f t
 
 isPassiveM :: FTPM Bool
@@ -85,11 +80,11 @@ storlinesM = aux' storlines
 putbinaryM :: String -> String -> FTPM FTPResult
 putbinaryM = aux' putbinary
  
-aux' :: (TMVar FConnection -> t -> t1 -> IO b) -> t -> t1 -> FTPM b
+aux' :: (FConn -> t -> t1 -> IO b) -> t -> t1 -> FTPM b
 aux' fun s1 s2 = monblock' (\f -> fun f s1 s2)
  
 monblock' :: 
-               (TMVar FConnection -> IO b) -> FTPM b
+               (FConn -> IO b) -> FTPM b
 monblock' fun = do s <- get
                    liftIO $ fun s
 
