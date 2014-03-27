@@ -84,7 +84,7 @@ aux' :: (FConn -> t -> t1 -> IO b) -> t -> t1 -> FTPM b
 aux' fun s1 s2 = monblock' (\f -> fun f s1 s2)
  
 monblock' :: 
-               (FConn -> IO b) -> FTPM b
+               (FConn-> IO b) -> FTPM b
 monblock' fun = do s <- get
                    liftIO $ fun s
 

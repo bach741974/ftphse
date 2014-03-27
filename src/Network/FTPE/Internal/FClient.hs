@@ -1,4 +1,4 @@
-
+{-# Language DeriveDataTypeable #-}
 module Network.FTPE.Internal.FClient 
 (
  -- * FTP commands 
@@ -7,7 +7,7 @@ module Network.FTPE.Internal.FClient
    Timeout (Time), dir, quit, sendcmd, cwd, nlst, loginAnon, FConnection(FTP), FConn 
    ,  block', setPassive, isPassive, N.enableFTPDebugging, getlines, getbinary
    , ThreadId, downloadbinary, delete, size, rmdir, mkdir, pwd, rename, putlines
-   , putbinary, uploadbinary, retrlines, storlines 
+   , putbinary, uploadbinary, retrlines, storlines
    
  ) 
            
@@ -30,7 +30,8 @@ import Control.Monad (void)
 newtype FConnection = FTP (N.FTPConnection, Bool)
 newtype Timeout = Time Int
 type FConn = TMVar FConnection
- 
+               
+
          
 setLogLevel :: Priority -> IO ()
 setLogLevel lev = do
@@ -101,16 +102,15 @@ setPassive var b = do
                    (return (N.setPassive f b) >>= \f1 -> atomically $ putTMVar var $ FTP (f1, b1))                      
                    $ atomically  (putTMVar var ftp)  
                    
-getbinary :: FConn -> String -> IO (String, FTPResult)
+getbinary:: FConn -> String -> IO (String, FTPResult)
 getbinary var s = block' var $ \f -> do (l, res) <- N.getbinary f s                 
                                         fmap (\l1 -> (l1,res)) $ mapM return l 
                
-getlines :: FConn -> String -> IO ([String], FTPResult)
+getlines, retrlines :: FConn -> String -> IO ([String], FTPResult)
 getlines var s = block' var $ \f -> do (l, res) <- N.getlines f s                 
                                        fmap (\l1 -> (l1,res)) $ mapM return l 
                                        
-retrlines :: FConn
-                   -> String -> IO ([String], FTPResult)
+
 retrlines var s = block' var $ \f -> do (l, res) <- N.retrlines f s                 
                                         fmap (\l1 -> (l1,res)) $ mapM return l                                                          
                    

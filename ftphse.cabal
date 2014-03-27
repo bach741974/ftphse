@@ -13,11 +13,13 @@ library
                    network,
                    stm,
                    MissingH,
-                   mtl
+                   mtl,
+                   global-variables >=1.0.1 && <1.1
   ghc-options:     -Wall
   
   exposed-modules: Network.FTPE.Client
   other-modules:   
                    Network.FTPE.Internal.FClient,
-                   Network.FTPE.Internal.MClient
+                   Network.FTPE.Internal.MClient,
+                   Network.FTPE.Internal.FClientExt
 
