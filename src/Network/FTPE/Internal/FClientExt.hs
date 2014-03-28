@@ -6,7 +6,7 @@ module Network.FTPE.Internal.FClientExt
    , dirE, quitE, sendcmdE, cwdE, nlstE, loginAnonE 
    , setPassiveE, isPassiveE, getlinesE, getbinaryE
    , downloadbinaryE, deleteE, sizeE, rmdirE, mkdirE, pwdE, renameE, putlinesE
-   , putbinaryE)
+   , putbinaryE, retrlinesE, uploadbinaryE, storlinesE, getVarFTP)
 where
 
 import Network.FTPE.Internal.FClient 
