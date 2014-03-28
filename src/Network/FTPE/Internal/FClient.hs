@@ -156,15 +156,13 @@ s'' fun var str = block' var $ flip fun str
 pwd :: FConn -> IO (Maybe String, FTPResult)
 pwd  = flip block' N.pwd
 
-rename :: FConn -> String -> String -> IO FTPResult
+rename, putbinary :: FConn -> String -> String -> IO FTPResult
 rename = aux N.rename 
+putbinary = aux N.putbinary
 
 putlines, storlines :: FConn -> String -> [String] -> IO FTPResult
 putlines  = aux N.putlines
 storlines = aux N.storlines
-
-putbinary :: FConn -> String -> String -> IO FTPResult
-putbinary = aux N.putbinary 
 
 aux :: (N.FTPConnection -> t -> t1 -> IO b)
          -> FConn -> t -> t1 -> IO b

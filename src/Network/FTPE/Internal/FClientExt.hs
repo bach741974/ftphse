@@ -1,6 +1,13 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# Language TypeSynonymInstances #-}
-module Network.FTPE.Internal.FClientExt where
+module Network.FTPE.Internal.FClientExt 
+( -- * FTP commands 
+     easyConnectFTPE, connectFTPE, loginE
+   , dirE, quitE, sendcmdE, cwdE, nlstE, loginAnonE 
+   , setPassiveE, isPassiveE, getlinesE, getbinaryE
+   , downloadbinaryE, deleteE, sizeE, rmdirE, mkdirE, pwdE, renameE, putlinesE
+   , putbinaryE)
+where
 
 import Network.FTPE.Internal.FClient 
 import Data.Global
@@ -52,13 +59,50 @@ loginE :: Maybe Timeout
                 -> IO (Maybe FTPResult, Maybe ThreadId)
 loginE t name p acc = maker (\con -> login con t name p acc)
 
+d' :: (FConn -> t -> IO b) -> t -> IO b
+d' f par = maker (`f` par) 
+
 setPassiveE :: Bool -> IO ()
-setPassiveE b = maker (`setPassive` b)
+setPassiveE = d' setPassive
 
 getbinaryE :: String -> IO (String, FTPResult)
-getbinaryE s = maker (`getbinary` s)  
+getbinaryE = d' getbinary 
 
 getlinesE, retrlinesE :: String -> IO ([String], FTPResult)
-getlinesE s = maker (`getlines` s)
+getlinesE  = d' getlines
+retrlinesE  = d' retrlines
 
-retrlinesE s = maker (`retrlines` s)                                
+nlstE, dirE :: Maybe String -> IO [String]
+nlstE = d' nlst
+dirE = d' dir
+
+sendcmdE, cwdE, downloadbinaryE, rmdirE,deleteE, uploadbinaryE:: String -> IO FTPResult
+sendcmdE   = d' sendcmd
+cwdE = d' cwd
+downloadbinaryE = d' downloadbinary
+rmdirE = d' rmdir
+deleteE = d' delete
+uploadbinaryE = d' uploadbinary 
+
+sizeE :: (Num a, Read a) => String -> IO a
+sizeE = d' size
+
+mkdirE :: String -> IO (Maybe String, FTPResult)
+mkdirE = d' mkdir
+
+pwdE :: IO (Maybe String, FTPResult)
+pwdE = maker pwd  
+
+
+d'' :: (FConn -> t -> t1 -> IO b) -> t -> t1 -> IO b
+d'' f par1 par2  = maker (\ftp -> f ftp par1 par2)
+
+renameE, putbinaryE :: String -> String -> IO FTPResult
+renameE = d'' rename
+putbinaryE = d'' putbinary
+
+putlinesE, storlinesE :: String -> [String] -> IO FTPResult
+putlinesE  = d'' putlines
+storlinesE = d'' storlines 
+
+                           

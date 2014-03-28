@@ -1,5 +1,5 @@
 name:           ftphse
-version:        0.4
+version:        0.7
 cabal-version:  >=1.2
 build-type:     Simple
 author:         Evgeny V. Bahvalov
@@ -17,9 +17,11 @@ library
                    global-variables >=1.0.1 && <1.1
   ghc-options:     -Wall
   
-  exposed-modules: Network.FTPE.Client
+  exposed-modules: 
+                   Network.FTPE.Client,
+                   Network.FTPE.ClientE
   other-modules:   
                    Network.FTPE.Internal.FClient,
-                   Network.FTPE.Internal.MClient,
-                   Network.FTPE.Internal.FClientExt
+                   Network.FTPE.Internal.FClientExt,
+                   Network.FTPE.Internal.MClient
 
