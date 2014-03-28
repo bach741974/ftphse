@@ -1,4 +1,4 @@
-{-# Language DeriveDataTypeable #-}
+
 module Network.FTPE.Internal.FClient 
 (
  -- * FTP commands 

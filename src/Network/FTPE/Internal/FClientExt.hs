@@ -50,7 +50,7 @@ isPassiveE :: IO Bool
 isPassiveE = maker isPassive 
 
 loginAnonE :: Maybe Timeout -> IO (Maybe FTPResult, Maybe ThreadId)
-loginAnonE t = maker (`loginAnon` t)
+loginAnonE  = d' loginAnon
 
 loginE :: Maybe Timeout
                 -> String
