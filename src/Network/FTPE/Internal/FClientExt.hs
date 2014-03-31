@@ -42,9 +42,9 @@ maker f = do
             case con of
                (Just con') -> f con'
                Nothing -> error "There is no any ftp connection; Please make connection"
-               
+              
 quitE :: IO FTPResult
-quitE = maker quit
+quitE = maker quit >>=(\res -> writeIORef getVarFTP Nothing >> return res) 
 
 isPassiveE :: IO Bool
 isPassiveE = maker isPassive 
