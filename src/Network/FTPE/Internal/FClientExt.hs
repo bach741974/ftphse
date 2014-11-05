@@ -12,12 +12,12 @@ where
 import Network.FTPE.Internal.FClient 
 import Data.Global
 import Data.IORef
-import Data.Typeable 
+-- import Data.Typeable 
 import Network.Socket(PortNumber, HostName)
 import Network.FTP.Client.Parser (FTPResult)
 
-instance Typeable FConn where
-        typeOf _ = typeOf ""
+--instance Typeable FConn where
+  --      typeOf _ = typeOf ""
 
 getVarFTP :: IORef (Maybe FConn)
 getVarFTP = declareIORef "get-ftp" Nothing 

@@ -14,7 +14,7 @@ library
                    stm,
                    MissingH,
                    mtl,
-                   global-variables >=1.0.1 && <1.1
+                   global-variables 
   ghc-options:     -Wall
   
   exposed-modules: 

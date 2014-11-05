@@ -1,4 +1,4 @@
-
+{-# LANGUAGE DeriveDataTypeable #-}
 module Network.FTPE.Internal.FClient 
 (
  -- * FTP commands 
@@ -26,11 +26,13 @@ import Control.Exception.Base (finally, onException)
 import System.IO (stdin, hGetEcho, hSetEcho, stdout, hFlush)
 import Control.Exception (bracket_)
 import Control.Monad (void)
-
+import Data.Typeable
 newtype FConnection = FTP (N.FTPConnection, Bool)
+                        deriving (Typeable)
 newtype Timeout = Time Int
+        
 type FConn = TMVar FConnection
-               
+              --deriving (Typeable)
 
          
 setLogLevel :: Priority -> IO ()
